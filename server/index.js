@@ -12,7 +12,7 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
 
 app.get("/api/candles", async (req, res) => {
   try {
-    const url = `https://api.twelvedata.com/time_series?symbol=XAU%2FUSD&interval=15min&outputsize=52&apikey=${TWELVE_KEY}`;
+    const url = `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=15min&outputsize=52&apikey=${TWELVE_KEY}`;
     const r = await fetch(url);
     const data = await r.json();
     if (data.status === "error") return res.status(400).json({ error: data.message });
@@ -31,7 +31,7 @@ app.get("/api/candles", async (req, res) => {
 
 app.get("/api/price", async (req, res) => {
   try {
-    const url = `https://api.twelvedata.com/price?symbol=XAU%2FUSD&apikey=${TWELVE_KEY}`;
+    const url = `https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${TWELVE_KEY}`;
     const r = await fetch(url);
     const data = await r.json();
     res.json({ price: parseFloat(data.price) });
