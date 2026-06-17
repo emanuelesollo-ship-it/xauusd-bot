@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const API = = "https://xauusd-bot-b507.onrender.com"; 
+const API =  "https://xauusd-bot-b507.onrender.com"; 
 
 function calcRSI(candles, period = 14) {
   if (candles.length < period + 1) return 50;
