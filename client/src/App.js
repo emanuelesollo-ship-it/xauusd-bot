@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:3001";
+const API = process.env.REACT_APP_API_URL || "http://localhost:3001"; 
 
 function calcRSI(candles, period = 14) {
   if (candles.length < period + 1) return 50;
