@@ -7,7 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const TWELVE_KEY = process.env.TWELVE_DATA_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
 
 app.get("/api/candles", async (req, res) => {
@@ -36,11 +35,16 @@ app.get("/api/candles", async (req, res) => {
 
 app.get("/api/price", async (req, res) => {
   try {
-    const url = `https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${TWELVE_KEY}`;
-    const r = await fetch(url);
+    const url = "https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=1m&range=1d";
+    const r = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" }
+    });
     const data = await r.json();
-    if (data.status === "error") return res.status(400).json({ error: data.message });
-    res.json({ price: parseFloat(data.price) });
+    const result = data?.chart?.result?.[0];
+    if (!result) return res.status(400).json({ error: "Nessun dato" });
+    const closes = result.indicators.quote[0].close.filter(Boolean);
+    const price = closes[closes.length - 1];
+    res.json({ price: +price.toFixed(2) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
