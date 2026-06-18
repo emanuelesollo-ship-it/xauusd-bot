@@ -10,7 +10,7 @@ app.use(express.json());
 const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
 
 // Offset per convertire GC=F futures in spot XAU/USD
-const FUTURES_SPOT_OFFSET = -38;
+const FUTURES_SPOT_OFFSET = -25;
 
 app.get("/api/candles", async (req, res) => {
   try {
