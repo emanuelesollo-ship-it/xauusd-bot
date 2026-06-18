@@ -9,12 +9,13 @@ app.use(express.json());
 
 const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
 
+// Offset per convertire GC=F futures in spot XAU/USD
+const FUTURES_SPOT_OFFSET = -38;
+
 app.get("/api/candles", async (req, res) => {
   try {
     const url = "https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=15m&range=2d";
-    const r = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0" }
-    });
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     const data = await r.json();
     const result = data?.chart?.result?.[0];
     if (!result) return res.status(400).json({ error: "Nessun dato Yahoo" });
@@ -22,10 +23,10 @@ app.get("/api/candles", async (req, res) => {
     const ohlcv = result.indicators.quote[0];
     const candles = timestamps.map((t, i) => ({
       time: new Date(t * 1000).toISOString(),
-      open:  ohlcv.open[i]  ? +ohlcv.open[i].toFixed(2)  : null,
-      high:  ohlcv.high[i]  ? +ohlcv.high[i].toFixed(2)  : null,
-      low:   ohlcv.low[i]   ? +ohlcv.low[i].toFixed(2)   : null,
-      close: ohlcv.close[i] ? +ohlcv.close[i].toFixed(2) : null,
+      open:  ohlcv.open[i]  ? +(ohlcv.open[i]  + FUTURES_SPOT_OFFSET).toFixed(2) : null,
+      high:  ohlcv.high[i]  ? +(ohlcv.high[i]  + FUTURES_SPOT_OFFSET).toFixed(2) : null,
+      low:   ohlcv.low[i]   ? +(ohlcv.low[i]   + FUTURES_SPOT_OFFSET).toFixed(2) : null,
+      close: ohlcv.close[i] ? +(ohlcv.close[i] + FUTURES_SPOT_OFFSET).toFixed(2) : null,
     })).filter(c => c.open && c.high && c.low && c.close).slice(-52);
     res.json({ candles });
   } catch (e) {
@@ -36,14 +37,12 @@ app.get("/api/candles", async (req, res) => {
 app.get("/api/price", async (req, res) => {
   try {
     const url = "https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=1m&range=1d";
-    const r = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0" }
-    });
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     const data = await r.json();
     const result = data?.chart?.result?.[0];
     if (!result) return res.status(400).json({ error: "Nessun dato" });
     const closes = result.indicators.quote[0].close.filter(Boolean);
-    const price = closes[closes.length - 1];
+    const price = closes[closes.length - 1] + FUTURES_SPOT_OFFSET;
     res.json({ price: +price.toFixed(2) });
   } catch (e) {
     res.status(500).json({ error: e.message });
